@@ -20,15 +20,17 @@ const Login: NextPage = () => {
 
       <div className="container mx-auto flex flex-col items-center md:justify-center min-h-screen p-4 font-noto-sans justify-between">
         <main className='max-w-sm md:max-w-lg border-[#BDBDBD] md:p-14 md:border md:rounded-3xl flex flex-col w-full items-start'>
-          <div>
-            <Image
-              src={systemTheme === 'dark' ? '/devchallenges-light.svg' : '/devchallenges.svg'}
-              alt='devchallenges.io logo'
-              width={132}
-              height={19}
-              objectFit='contain'
-            />
-          </div>
+          <Link href='/'>
+            <a className='flex'>
+              <Image
+                src={systemTheme === 'dark' ? '/devchallenges-light.svg' : '/devchallenges.svg'}
+                alt='devchallenges.io logo'
+                width={132}
+                height={19}
+                objectFit='contain'
+              />
+            </a>
+          </Link>
           <h1 className='font-semibold text-lg mt-7'>Login</h1>
 
           <form className='w-full mt-7 placeholder:text-[#828282]'

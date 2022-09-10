@@ -22,15 +22,17 @@ const Home: NextPage = () => {
 
       <div className="container mx-auto flex flex-col items-center md:justify-center min-h-screen p-4 font-noto-sans justify-between">
         <main className='max-w-sm md:max-w-lg md:p-14 md:border border-[#BDBDBD] md:rounded-3xl flex flex-col w-full items-start'>
-          <div>
-            <Image
-              src={systemTheme === 'dark' ? '/devchallenges-light.svg' : '/devchallenges.svg'}
-              alt='devchallenges.io logo'
-              width={132}
-              height={19}
-              objectFit='contain'
-            />
-          </div>
+          <Link href='/'>
+            <a className='flex'>
+              <Image
+                src={systemTheme === 'dark' ? '/devchallenges-light.svg' : '/devchallenges.svg'}
+                alt='devchallenges.io logo'
+                width={132}
+                height={19}
+                objectFit='contain'
+              />
+            </a>
+          </Link>
           <h1 className='font-semibold text-lg mt-7'>Join thousands of learners from around the world</h1>
           <p className='mt-4'>Master web development by making real-life projects. There are multiple paths for you to choose.</p>
 
@@ -54,11 +56,11 @@ const Home: NextPage = () => {
             {['Google', 'Facebook', 'Twitter', 'Github'].map(provider => (
               <SocialButton
                 key={provider}
-                className='flex hover:bg-gray-200 dark:hover:bg-inherit active:bg-gray-400 rounded-full' provider={provider}
+                className='flex hover:bg-gray-200 dark:hover:bg-inherit dark:hover:opacity-70 active:bg-gray-400 dark:active:bg-inherit dark:active:opacity-50 rounded-full' provider={provider}
               />
             ))}
             <SocialButton
-              className='flex hover:opacity-90 active:opacity-80 rounded-full grayscale' provider='Discord'
+              className='flex hover:opacity-90 dark:hover:opacity-70 dark:active:opacity-50 active:opacity-80 rounded-full grayscale' provider='Discord'
             />
           </div>
 
