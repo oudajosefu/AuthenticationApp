@@ -10,6 +10,7 @@ import GithubProvider from "next-auth/providers/github";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "../../../server/db/client";
 import { env } from "../../../env/server.mjs";
+import { trpc } from "../../../utils/trpc";
 
 export const authOptions: NextAuthOptions = {
   // Include user.id on session
@@ -30,20 +31,13 @@ export const authOptions: NextAuthOptions = {
         email: { label: "Email", type: "email", placeholder: "Email" },
         password: { label: "Password", type: "password", placeholder: "Password" },
       },
-      async authorize(credentials, req) {
-        const user = await prisma.user.findUnique({
-          where: {
-            email: credentials?.email,
-          },
-        });
-        if (!user) {
-          throw new Error("No user found");
+      async authorize(credentials) {
+        const { data } = trpc.useQuery(["credentials.check", credentials]);
+        if (data?.status === "ok" && data?.user) {
+          return data.user;
+        } else {
+          throw new Error(data?.message as string);
         }
-        const isValid = credentials?.password === user.password;
-        if (!isValid) {
-          throw new Error("Invalid password");
-        }
-        return user;
       }
     }),
     DiscordProvider({
@@ -68,8 +62,12 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   pages: {
-    signIn: "/auth/login",
-  }
+    signIn: "/",
+    newUser: "/",
+  },
+  // session: {
+  //   strategy: "jwt",
+  // }
 };
 
 export default NextAuth(authOptions);

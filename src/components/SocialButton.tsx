@@ -9,7 +9,7 @@ type Props = {
 
 const SocialButton: FC<Props> = ({ className, provider }) => {
   return (
-    <button className={className} onClick={() => signIn(provider.toLowerCase())}>
+    <button className={className} onClick={() => signIn(provider.toLowerCase(), { callbackUrl: '/' })}>
       <Image
         src={`/${provider}.svg`}
         alt={`${provider} logo`}
