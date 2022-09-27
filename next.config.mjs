@@ -18,7 +18,15 @@ export default defineNextConfig({
   images: {
     domains: [
       'platform-lookaside.fbsbx.com',
-      'cdn.discordapp.com'
+      'cdn.discordapp.com',
+      'lh3.googleusercontent.com',
+      'avatars.githubusercontent.com'
     ],
+    // remotePatterns: [
+    //   {
+    //     protocol: 'https',
+    //     host: '**.com',
+    //   }
+    // ]
   }
 });
