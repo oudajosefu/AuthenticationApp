@@ -12,11 +12,16 @@ import { Menu, Transition } from "@headlessui/react";
 import MenuLinkButton from "../components/MenuLink";
 import { useForm } from "react-hook-form";
 
-type FormData = {
+type EditFormData = {
   image: string;
   name: string;
   bio: string;
   phone: string;
+  email: string;
+  password: string;
+};
+
+type signInFormData = {
   email: string;
   password: string;
 };
@@ -47,13 +52,31 @@ const Home: NextPage = () => {
     },
   });
 
-  const { register, handleSubmit, formState: { errors } } = useForm<FormData>();
+  const {
+    register: editFormRegister,
+    handleSubmit: editFormHandleSubmit,
+    formState: { errors: editFormErrors }
+  } = useForm<EditFormData>();
+  const {
+    register: signInFormRegister,
+    handleSubmit: signInFormHandleSubmit,
+    formState: { errors: signInFormErrors }
+  } = useForm<signInFormData>();
 
-  const onSubmit = handleSubmit(data => {
+
+  const onEditSubmit = editFormHandleSubmit(data => {
     if (!imageFile && user?.image) setImageFile(user.image);
     if (imageFile) data.image = imageFile;
     else data.image = '';
     updateUser.mutate(data);
+  });
+
+  const onSignInSubmit = signInFormHandleSubmit(data => {
+    signIn('credentials', {
+      redirect: false,
+      email: data.email,
+      password: data.password,
+    });
   });
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -144,7 +167,7 @@ const Home: NextPage = () => {
                       leaveFrom="transform opacity-100 scale-100"
                       leaveTo="transform opacity-0 scale-95"
                     >
-                      <Menu.Items className='absolute flex flex-col gap-2 w-48 origin-top-right rounded-2xl shadow-lg bg-[#2c2c2c] top-full right-0 mt-2 ring-1 ring-black/5 focus:outline-none p-4 justify-start divide-y divide-gray-500'>
+                      <Menu.Items className='absolute flex flex-col gap-2 w-48 origin-top-right rounded-2xl shadow-lg dark:bg-[#2c2c2c] top-full right-0 mt-2 ring-1 ring-black/5 focus:outline-none p-4 justify-start divide-y divide-gray-500'>
                         <div className='flex flex-col'>
                           {[
                             { name: 'Profile', href: '/profile', icon: <UserCircleIcon className='w-5 h-5 text-gray-400' /> },
@@ -153,7 +176,7 @@ const Home: NextPage = () => {
                             <Menu.Item key={link.name}>
                               {({ active }) => (
                                 <MenuLinkButton
-                                  className={`p-2 flex rounded-lg ${active && 'dark:bg-gray-700 bg-[#F2F2F2]'}`}
+                                  className={`p-2 flex rounded-lg ${active && 'dark:bg-gray-700 bg-[#F2F2F2] active:bg-[#dedede]'}`}
                                   href={link.href}>
                                   {link.icon}
                                   {link.name}
@@ -166,7 +189,7 @@ const Home: NextPage = () => {
                           <Menu.Item>
                             {({ active }) => (
                               <button
-                                className={`p-2 flex items-center mt-2 gap-2 rounded-lg text-red-500 ${active && 'dark:bg-red-700/20 bg-[#F2F2F2]'}`}
+                                className={`p-2 flex items-center mt-2 gap-2 rounded-lg text-red-500 ${active && 'dark:bg-red-700/20 bg-red-500/20 active:bg-red-500/30'}`}
                                 onClick={() => signOut()}>
                                 <ArrowRightOnRectangleIcon className='w-5 h-5' />
                                 Logout
@@ -199,7 +222,7 @@ const Home: NextPage = () => {
               <main className={`w-full ${editMode ? 'mt-2' : 'mt-10'} max-w-3xl lg:p-12 place-self-center lg:ring-1 ring-[#E0E0E0] dark:ring-[#BDBDBD] rounded-3xl mx-auto`}>
                 {editMode ? (
                   <form className='flex flex-col max-w-sm gap-4 mx-auto lg:mx-0'
-                    onSubmit={onSubmit}>
+                    onSubmit={onEditSubmit}>
                     <div className='flex flex-col gap-2'>
                       <h1 className='text-2xl'>Change Info</h1>
                       <p className='text-sm text-[#828282]'>Changes will be reflected to every service</p>
@@ -228,13 +251,13 @@ const Home: NextPage = () => {
                           id='image'
                           accept='image/png, image/jpeg'
                           alt='user profile image input'
-                          {...register('image')}
+                          {...editFormRegister('image')}
                           onChange={handleImageChange}
                         />
                       </label>
                       <h1 className='uppercase text-[#828282]'>Change photo</h1>
                     </div>
-                    {errors.image && (<p className='text-red-500 normal-case'>{errors.image.message}</p>)}
+                    {editFormErrors.image && (<p className='text-red-500 normal-case'>{editFormErrors.image.message}</p>)}
 
                     <label className='flex flex-col gap-2 text-sm font-medium capitalize'>
                       <h1>Name</h1>
@@ -243,11 +266,11 @@ const Home: NextPage = () => {
                         type='text'
                         placeholder='Enter your name...'
                         defaultValue={user.name ?? ''}
-                        {...register('name', {
+                        {...editFormRegister('name', {
                           required: '* Name is required',
                         })}
                       />
-                      {errors.name && (<p className='text-red-500 normal-case'>{errors.name.message}</p>)}
+                      {editFormErrors.name && (<p className='text-red-500 normal-case'>{editFormErrors.name.message}</p>)}
                     </label>
                     <label className='flex flex-col gap-2 text-sm font-medium capitalize'>
                       <h1>Bio</h1>
@@ -256,11 +279,11 @@ const Home: NextPage = () => {
                         placeholder='Enter your bio...'
                         defaultValue={user.bio ?? ''}
                         rows={3}
-                        {...register('bio', {
+                        {...editFormRegister('bio', {
                           required: '* Bio is required',
                         })}
                       />
-                      {errors.bio && (<p className='text-red-500 normal-case'>{errors.bio.message}</p>)}
+                      {editFormErrors.bio && (<p className='text-red-500 normal-case'>{editFormErrors.bio.message}</p>)}
                     </label>
                     <label className='flex flex-col gap-2 text-sm font-medium capitalize'>
                       <h1>Phone</h1>
@@ -269,7 +292,7 @@ const Home: NextPage = () => {
                         type='text'
                         placeholder='Enter your phone...'
                         defaultValue={user.phone ?? ''}
-                        {...register('phone', {
+                        {...editFormRegister('phone', {
                           required: '* Phone is required',
                           minLength: {
                             value: 10,
@@ -277,7 +300,7 @@ const Home: NextPage = () => {
                           },
                         })}
                       />
-                      {errors.phone && (<p className='text-red-500 normal-case'>{errors.phone.message}</p>)}
+                      {editFormErrors.phone && (<p className='text-red-500 normal-case'>{editFormErrors.phone.message}</p>)}
                     </label>
                     <label className='flex flex-col gap-2 text-sm font-medium capitalize'>
                       <h1>Email</h1>
@@ -286,11 +309,11 @@ const Home: NextPage = () => {
                         type='email'
                         placeholder='Enter your email...'
                         defaultValue={user.email ?? ''}
-                        {...register('email', {
+                        {...editFormRegister('email', {
                           required: '* Email is required',
                         })}
                       />
-                      {errors.email && (<p className='text-red-500 normal-case'>{errors.email.message}</p>)}
+                      {editFormErrors.email && (<p className='text-red-500 normal-case'>{editFormErrors.email.message}</p>)}
                     </label>
                     <label className='flex flex-col gap-2 text-sm font-medium capitalize'>
                       <h1>Password</h1>
@@ -299,11 +322,11 @@ const Home: NextPage = () => {
                         type='password'
                         placeholder='Enter your password...'
                         defaultValue={user.password ?? ''}
-                        {...register('password')}
+                        {...editFormRegister('password')}
                       />
-                      {errors.password && (<p className='text-red-500 normal-case'>{errors.password.message}</p>)}
+                      {editFormErrors.password && (<p className='text-red-500 normal-case'>{editFormErrors.password.message}</p>)}
                     </label>
-                    <button className='self-start px-10 py-2 mt-4 rounded-lg shadow-2xl shadow-black bg-gradient-to-br from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 active:from-blue-700 active:to-blue-900 disabled:from-red-500 disabled:to-red-700 disabled:px-4 flex items-center gap-2' type='submit' disabled={updateUser.isLoading}>
+                    <button className='self-start px-10 py-2 mt-4 rounded-lg shadow-2xl text-white dark:text-[#828282] shadow-black bg-gradient-to-br from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 active:from-blue-700 active:to-blue-900 disabled:from-red-500 disabled:to-red-700 disabled:px-4 flex items-center gap-2' type='submit' disabled={updateUser.isLoading}>
                       {updateUser.isLoading ? (
                         <>
                           <ArrowPathIcon className="w-5 h-5 animate-spin" />
@@ -319,7 +342,9 @@ const Home: NextPage = () => {
                         <h1 className='text-2xl'>Profile</h1>
                         <h3 className='text-xs opacity-80'>Some info may be visible to other people</h3>
                       </label>
-                      <button className='py-2 px-9 ring-1 ring-[#828282] ring-inset rounded-xl text-[#828282] hover:bg-gray-600 active:bg-gray-700 justify-self-end' id='edit' onClick={() => setEditMode(true)}>
+                      <button
+                        className='py-2 px-9 ring-1 ring-[#828282] ring-inset rounded-xl text-[#828282] hover:bg-gray-200 active:bg-gray-300 dark:hover:bg-gray-600 dark:active:bg-gray-700 justify-self-end' id='edit'
+                        onClick={() => setEditMode(true)}>
                         Edit
                       </button>
                       {updateUser.isError && (
@@ -394,22 +419,35 @@ const Home: NextPage = () => {
             <h1 className='text-lg font-semibold mt-7'>Login</h1>
 
             <form className='w-full mt-7 placeholder:text-[#828282]'
-              onSubmit={(event) => {
-                event.preventDefault();
-                const target = event.target as HTMLFormElement;
-                signIn('credentials', {
-                  email: target.email.value,
-                  password: target.password.value,
-                });
-              }}>
+              onSubmit={onSignInSubmit}>
               <label className='border border-[#BDBDBD] rounded-lg flex items-center py-3 px-3 gap-3'>
                 <EnvelopeIcon className='w-5 h-5 fill-[#828282]' />
-                <input className='outline-none grow bg-inherit' type="email" name="registration" id="email" placeholder='Email' />
+                <input
+                  className='outline-none grow bg-inherit'
+                  type="email"
+                  placeholder='Email'
+                  {...signInFormRegister('email', {
+                    required: '* Email is required',
+                    pattern: {
+                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                      message: '* Invalid email address'
+                    }
+                  })}
+                />
               </label>
+              {signInFormErrors.email && (
+                <p className='text-red-500 normal-case'>{signInFormErrors.email.message}</p>
+              )}
 
               <label className='border border-[#BDBDBD] rounded-lg flex items-center py-3 px-3 gap-3 mt-4'>
                 <LockClosedIcon className='w-5 h-5 fill-[#828282]' />
-                <input className='outline-none grow bg-inherit' type={showPassword ? 'text' : 'password'} name="registration" id="password" placeholder='Password' />
+                <input
+                  className='outline-none grow bg-inherit'
+                  type={showPassword ? 'text' : 'password'} placeholder='Password'
+                  {...signInFormRegister('password', {
+                    required: '* Password is required'
+                  })}
+                />
                 <button type='button' onClick={() => setShowPassword(!showPassword)}>
                   {showPassword ? (
                     <EyeSlashIcon className='w-5 h-5 fill-[#828282]' />
@@ -418,6 +456,9 @@ const Home: NextPage = () => {
                   )}
                 </button>
               </label>
+              {signInFormErrors.password && (
+                <p className='text-red-500 text-sm'>{signInFormErrors.password.message}</p>
+              )}
               <button className='bg-[#2f7bed] hover:bg-[#2b74d2] active:bg-[#1e5296] text-white w-full mt-6 rounded-lg py-2 font-semibold' type="submit">Login</button>
             </form>
 
