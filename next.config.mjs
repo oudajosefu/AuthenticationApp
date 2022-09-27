@@ -16,6 +16,9 @@ export default defineNextConfig({
   reactStrictMode: true,
   swcMinify: true,
   images: {
-    domains: ['platform-lookaside.fbsbx.com'],
+    domains: [
+      'platform-lookaside.fbsbx.com',
+      'cdn.discordapp.com'
+    ],
   }
 });

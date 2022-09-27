@@ -2,20 +2,24 @@ import { forwardRef } from 'react';
 import Link from 'next/link';
 
 type Props = {
+  className: string;
   href: string;
   children: React.ReactNode;
 };
 
-const MenuLink = forwardRef(({ href, children, ...rest }: Props, ref: React.Ref<HTMLAnchorElement>) => {
-  return (
-    <Link href={href}>
-      <a ref={ref} {...rest}>
-        {children}
-      </a>
-    </Link>
-  );
-});
+const MenuLinkButton = forwardRef(
+  ({ href, children, ...rest }: Props, ref: React.Ref<HTMLAnchorElement>) => {
+    return (
+      <button {...rest}>
+        <Link href={href}>
+          <a className='flex items-center gap-2' ref={ref}>
+            {children}
+          </a>
+        </Link>
+      </button>
+    );
+  });
 
-MenuLink.displayName = 'MenuLink';
+MenuLinkButton.displayName = 'MenuLink';
 
-export default MenuLink;
+export default MenuLinkButton;

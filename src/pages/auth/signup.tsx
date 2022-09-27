@@ -41,7 +41,7 @@ const Signup: NextPage = () => {
         <link rel="icon" href="/devchallenges.png" />
       </Head>
 
-      <div className="container mx-auto flex flex-col items-center md:justify-center min-h-screen p-4 font-noto-sans justify-between">
+      <div className="container flex flex-col items-center justify-between min-h-screen p-4 mx-auto md:justify-center font-noto-sans">
         <main className='max-w-sm md:max-w-lg md:p-14 md:border border-[#BDBDBD] md:rounded-3xl flex flex-col w-full items-start'>
           <Link href='/'>
             <a className='flex'>
@@ -54,7 +54,7 @@ const Signup: NextPage = () => {
               />
             </a>
           </Link>
-          <h1 className='font-semibold text-lg mt-7'>Join thousands of learners from around the world</h1>
+          <h1 className='text-lg font-semibold mt-7'>Join thousands of learners from around the world</h1>
           <p className='mt-4'>Master web development by making real-life projects. There are multiple paths for you to choose.</p>
 
           <form className='w-full mt-9 placeholder:text-[#828282]'
@@ -96,15 +96,22 @@ const Signup: NextPage = () => {
 
           <p className='mt-8 self-center text-sm text-[#828282]'>or continue with these social profiles</p>
 
-          <div className='flex gap-5 mt-6 self-center items-center'>
+          <div className='flex items-center self-center gap-5 mt-6'>
             {['Google', 'Facebook', 'Twitter', 'Github'].map(provider => (
               <SocialButton
                 key={provider}
-                className='flex hover:bg-gray-200 dark:hover:bg-inherit dark:hover:opacity-70 active:bg-gray-400 dark:active:bg-inherit dark:active:opacity-50 rounded-full' provider={provider}
+                className='flex rounded-full hover:bg-gray-200 active:bg-gray-400' provider={provider}
+                handleClick={() => {
+                  signIn(provider.toLowerCase(), { callbackUrl: '/' });
+                }}
               />
             ))}
             <SocialButton
-              className='flex hover:opacity-90 dark:hover:opacity-70 dark:active:opacity-50 active:opacity-80 rounded-full grayscale' provider='Discord'
+              className='flex rounded-full hover:opacity-90 active:opacity-80 grayscale'
+              provider='Discord'
+              handleClick={() => {
+                signIn('discord', { callbackUrl: '/' });
+              }}
             />
           </div>
 

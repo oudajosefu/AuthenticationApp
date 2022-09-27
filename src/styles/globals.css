@@ -1,3 +1,21 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer utilities {
+  .grid-lines {
+    --c: linear-gradient(hsl(0, 0%, 74%), hsl(0, 0%, 74%));
+    --p: 0px;
+    --h: calc(100% + 2*var(--p));
+    background:
+      /* horizontal lines*/
+      var(--c) var(--p) var(--p) / var(--h) 1px,
+      var(--c) var(--p) calc(1*(var(--h) / 6) + var(--p)) / var(--h) 1px,
+      var(--c) var(--p) calc(2*(var(--h) / 6) + var(--p)) / var(--h) 1px,
+      var(--c) var(--p) calc(3*(var(--h) / 6) + var(--p)) / var(--h) 1px,
+      var(--c) var(--p) calc(4*(var(--h) / 6) + var(--p)) / var(--h) 1px,
+      var(--c) var(--p) calc(5*(var(--h) / 6) + var(--p)) / var(--h) 1px;
+    padding: calc(--p);
+    background-repeat: no-repeat;
+  }
+}

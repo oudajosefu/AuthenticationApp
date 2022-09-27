@@ -1,15 +1,15 @@
 import { FC } from "react";
 import Image from "next/image";
-import { signIn } from "next-auth/react";
 
 type Props = {
   className?: string;
   provider: string;
+  handleClick: () => void;
 };
 
-const SocialButton: FC<Props> = ({ className, provider }) => {
+const SocialButton: FC<Props> = ({ className, provider, handleClick }) => {
   return (
-    <button className={className} onClick={() => signIn(provider.toLowerCase(), { callbackUrl: '/' })}>
+    <button className={className} onClick={handleClick}>
       <Image
         src={`/${provider}.svg`}
         alt={`${provider} logo`}

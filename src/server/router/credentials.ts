@@ -1,6 +1,5 @@
-import { createRouter } from "./context";
+import { createRouter, hashPassword } from "./context";
 import { z } from "zod";
-import sha256 from "crypto-js/sha256";
 import { omit } from "lodash";
 
 export const credentialsRouter = createRouter()
@@ -46,7 +45,3 @@ export const credentialsRouter = createRouter()
       }
     },
   });
-
-const hashPassword = (password: string) => {
-  return sha256(password).toString();
-};
