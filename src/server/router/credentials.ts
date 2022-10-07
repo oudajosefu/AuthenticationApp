@@ -1,47 +1,87 @@
-import { createRouter, hashPassword } from "./context";
+import { createRouter } from "./context";
 import { z } from "zod";
 import { omit } from "lodash";
+import { hash, compare } from "bcryptjs";
 
 export const credentialsRouter = createRouter()
   .query("check", {
     input: z.object({
       email: z.string().email(),
       password: z.string(),
-    }).nullish(),
+    }).optional(),
     async resolve({ ctx, input }) {
-      const user = await ctx.prisma.user.findUnique({
-        where: {
-          email: input?.email,
-        },
-      });
-      if (user && user.password === hashPassword(input?.password as string)) {
+      if (!ctx) {
         return {
-          status: "ok",
-          user: omit(user, "password"),
+          status: "error",
+          message: "Context somehow not available",
         };
-      } else {
+      }
+      if (!input?.email || !input?.password) {
         return {
           status: "error",
           message: "Invalid email or password",
         };
       }
+      const user = await ctx.prisma.user.findUnique({
+        where: {
+          email: input?.email,
+        },
+      });
+      if (!user) {
+        return {
+          status: "error",
+          message: "Invalid email or password",
+        };
+      }
+
+      const match = user.password && await compare(input?.password, user.password);
+      if (match) {
+        return {
+          status: "success",
+          user: omit(user, "password"),
+        };
+      }
+
+      return {
+        status: "error",
+        message: "Invalid email or password",
+      };
     },
   })
   .mutation("create", {
     input: z.object({
-      email: z.string().email(),
+      email: z.string().email({ message: "* Invalid email address" }),
       password: z.string(),
     }),
-    async resolve({ ctx, input }) {
+    async resolve({ ctx, input: { email, password } }) {
+      const user = await ctx.prisma.user.findUnique({
+        where: {
+          email,
+        },
+      });
+      if (user) {
+        return {
+          status: "error",
+          message: "* Email already exists",
+        };
+      }
+
       try {
         await ctx.prisma.user.create({
           data: {
-            email: input.email,
-            password: hashPassword(input.password),
+            email: email,
+            password: await hash(password, 12),
           },
         });
+        return {
+          status: "success",
+          message: 'User created. Please log in.'
+        };
       } catch (err) {
-        console.log('Prisma user create error:', err);
+        return {
+          status: "error",
+          message: err as string,
+        };
       }
     },
   });

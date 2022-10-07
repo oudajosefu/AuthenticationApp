@@ -9,6 +9,12 @@ import { useTheme } from "next-themes";
 import { signIn } from 'next-auth/react';
 import { useState } from 'react';
 import { useRouter } from 'next/router';
+import { useForm } from 'react-hook-form';
+
+type SignUpFormData = {
+  email: string;
+  password: string;
+};
 
 const Signup: NextPage = () => {
   const { systemTheme } = useTheme();
@@ -16,19 +22,22 @@ const Signup: NextPage = () => {
 
   const router = useRouter();
 
-  const [usedCredentials, setUsedCredentials] = useState({
-    email: '',
-    password: '',
-  });
+  const [signUpError, setSignUpError] = useState('');
 
   const createUser = trpc.useMutation(['credentials.create'], {
-    onSuccess: () => {
-      signIn('credentials', {
-        email: usedCredentials.email,
-        password: usedCredentials.password,
-        callbackUrl: '/',
-      });
+    onSuccess: (data) => {
+      if (data.status === 'error') {
+        setSignUpError(data.message);
+      } else {
+        router.push(`/?signup=${data.status}&message=${data.message}`);
+      }
     }
+  });
+
+  const { register, handleSubmit, formState: { errors } } = useForm<SignUpFormData>();
+
+  const onSignUpSubmit = handleSubmit(data => {
+    createUser.mutate(data);
   });
 
   const [showPassword, setShowPassword] = useState(false);
@@ -58,31 +67,38 @@ const Signup: NextPage = () => {
           <p className='mt-4'>Master web development by making real-life projects. There are multiple paths for you to choose.</p>
 
           <form className='w-full mt-9 placeholder:text-[#828282]'
-            onSubmit={(event) => {
-              event.preventDefault();
-              const target = event.target as HTMLFormElement;
-
-              console.log(target.email.value);
-              console.log(target.password.value);
-
-              setUsedCredentials({
-                email: target.email.value,
-                password: target.password.value,
-              });
-
-              createUser.mutate({
-                email: target.email.value,
-                password: target.password.value,
-              });
-            }}>
+            onSubmit={onSignUpSubmit}>
             <label className='border border-[#BDBDBD] rounded-lg flex items-center py-3 px-3 gap-3'>
               <EnvelopeIcon className='w-5 h-5 fill-[#828282]' />
-              <input className='outline-none grow bg-inherit' type="email" name="registration" id="email" placeholder='Email' />
+              <input
+                className='outline-none grow bg-inherit'
+                type="email"
+                placeholder='Email'
+                {...register('email', {
+                  required: '* Email is required',
+                  pattern: {
+                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                    message: '* Invalid email address'
+                  }
+                })}
+              />
             </label>
+            {errors.email && <p className='text-red-500 text-sm mt-2'>{errors.email.message}</p>}
 
             <label className='border border-[#BDBDBD] rounded-lg flex items-center py-3 px-3 gap-3 mt-4'>
               <LockClosedIcon className='w-5 h-5 fill-[#828282]' />
-              <input className='outline-none grow bg-inherit' type={showPassword ? 'text' : 'password'} name="registration" id="password" placeholder='Password' />
+              <input
+                className='outline-none grow bg-inherit'
+                type={showPassword ? 'text' : 'password'}
+                placeholder='Password'
+                {...register('password', {
+                  required: '* Password is required',
+                  minLength: {
+                    value: 8,
+                    message: '* Password must have at least 8 characters'
+                  }
+                })}
+              />
               <button type='button' onClick={() => setShowPassword(!showPassword)}>
                 {showPassword ? (
                   <EyeSlashIcon className='w-5 h-5 fill-[#828282]' />
@@ -91,6 +107,8 @@ const Signup: NextPage = () => {
                 )}
               </button>
             </label>
+            {errors.password && <p className='text-red-500 text-sm mt-2'>{errors.password.message}</p>}
+            {signUpError && <p className='text-red-500 text-sm mt-2'>{signUpError}</p>}
             <button className='bg-[#2f7bed] hover:bg-[#2b74d2] active:bg-[#1e5296] text-white w-full mt-6 rounded-lg py-2 font-semibold' type="submit">Start coding now</button>
           </form>
 

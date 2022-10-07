@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { createProtectedRouter } from "./protected-router";
-import { hashPassword, unhashPassword } from "./context";
+import { hash } from "bcryptjs";
 
 // Example router with queries that can only be hit if the user requesting is signed in
 export const protectedUserRouter = createProtectedRouter()
@@ -44,7 +44,7 @@ export const protectedUserRouter = createProtectedRouter()
           data: {
             ...rest,
             image: rest.image || ctx.session.user.image,
-            password: rest.password ? hashPassword(rest.password) : undefined,
+            password: rest.password && await hash(rest.password, 12),
           },
         });
       } catch (err) {

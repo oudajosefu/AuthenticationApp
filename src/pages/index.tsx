@@ -11,6 +11,7 @@ import { Fragment, useState } from "react";
 import { Menu, Transition } from "@headlessui/react";
 import MenuLinkButton from "../components/MenuLink";
 import { useForm } from "react-hook-form";
+import { useRouter } from "next/router";
 
 type EditFormData = {
   image: string;
@@ -31,11 +32,11 @@ const Home: NextPage = () => {
 
   const { data: session, status } = useSession();
   const ctx = trpc.useContext();
+  const router = useRouter();
 
   const [showPassword, setShowPassword] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [imageFile, setImageFile] = useState<string | null>(null);
-
 
   const { data: user } = trpc.useQuery(['user.getUser']);
   const updateUser = trpc.useMutation('user.updateUser', {
@@ -63,7 +64,6 @@ const Home: NextPage = () => {
     formState: { errors: signInFormErrors }
   } = useForm<signInFormData>();
 
-
   const onEditSubmit = editFormHandleSubmit(data => {
     if (!imageFile && user?.image) setImageFile(user.image);
     if (imageFile) data.image = imageFile;
@@ -71,12 +71,13 @@ const Home: NextPage = () => {
     updateUser.mutate(data);
   });
 
-  const onSignInSubmit = signInFormHandleSubmit(data => {
-    signIn('credentials', {
+  const onSignInSubmit = signInFormHandleSubmit(async data => {
+    const signInResult = await signIn('credentials', {
       redirect: false,
       email: data.email,
       password: data.password,
     });
+    console.log(signInResult);
   });
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -262,7 +263,7 @@ const Home: NextPage = () => {
                     <label className='flex flex-col gap-2 text-sm font-medium capitalize'>
                       <h1>Name</h1>
                       <input
-                        className='rounded-xl p-3 ring-1 ring-[#828282]'
+                        className='rounded-xl p-3 ring-1 ring-[#828282] bg-[#3B3B3B]'
                         type='text'
                         placeholder='Enter your name...'
                         defaultValue={user.name ?? ''}
@@ -275,7 +276,7 @@ const Home: NextPage = () => {
                     <label className='flex flex-col gap-2 text-sm font-medium capitalize'>
                       <h1>Bio</h1>
                       <textarea
-                        className='rounded-xl p-3 ring-1 ring-[#828282]'
+                        className='rounded-xl p-3 ring-1 ring-[#828282] bg-[#3B3B3B]'
                         placeholder='Enter your bio...'
                         defaultValue={user.bio ?? ''}
                         rows={3}
@@ -288,7 +289,7 @@ const Home: NextPage = () => {
                     <label className='flex flex-col gap-2 text-sm font-medium capitalize'>
                       <h1>Phone</h1>
                       <input
-                        className='rounded-xl p-3 ring-1 ring-[#828282]'
+                        className='rounded-xl p-3 ring-1 ring-[#828282] bg-[#3B3B3B]'
                         type='text'
                         placeholder='Enter your phone...'
                         defaultValue={user.phone ?? ''}
@@ -305,7 +306,7 @@ const Home: NextPage = () => {
                     <label className='flex flex-col gap-2 text-sm font-medium capitalize'>
                       <h1>Email</h1>
                       <input
-                        className='rounded-xl p-3 ring-1 ring-[#828282]'
+                        className='rounded-xl p-3 ring-1 ring-[#828282] bg-[#3B3B3B]'
                         type='email'
                         placeholder='Enter your email...'
                         defaultValue={user.email ?? ''}
@@ -318,7 +319,7 @@ const Home: NextPage = () => {
                     <label className='flex flex-col gap-2 text-sm font-medium capitalize'>
                       <h1>Password</h1>
                       <input
-                        className='rounded-xl p-3 ring-1 ring-[#828282]'
+                        className='rounded-xl p-3 ring-1 ring-[#828282] bg-[#3B3B3B]'
                         type='password'
                         placeholder='Enter your password...'
                         defaultValue={user.password ?? ''}
@@ -326,7 +327,7 @@ const Home: NextPage = () => {
                       />
                       {editFormErrors.password && (<p className='text-red-500 normal-case'>{editFormErrors.password.message}</p>)}
                     </label>
-                    <button className='self-start px-10 py-2 mt-4 rounded-lg shadow-2xl text-white dark:text-[#828282] shadow-black bg-gradient-to-br from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 active:from-blue-700 active:to-blue-900 disabled:from-red-500 disabled:to-red-700 disabled:px-4 flex items-center gap-2' type='submit' disabled={updateUser.isLoading}>
+                    <button className='self-start px-10 py-2 rounded-lg shadow-2xl text-white transition-all duration-500 shadow-black bg-gradient-to-br from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 active:from-blue-700 active:to-blue-900 disabled:from-red-500 disabled:to-red-700 disabled:px-4 flex items-center gap-2' type='submit' disabled={updateUser.isLoading}>
                       {updateUser.isLoading ? (
                         <>
                           <ArrowPathIcon className="w-5 h-5 animate-spin" />
@@ -354,7 +355,7 @@ const Home: NextPage = () => {
                         <p className='text-green-500 normal-case col-start-2 justify-self-end text-right'>Profile updated successfully</p>
                       )}
                     </div>
-                    <div className='grid w-full max-w-3xl grid-cols-[auto_minmax(0,_1fr)] mt-10 grid-rows-6 place-self-center gap-x-4 lg:gap-x-32 grid-lines gap-y-2'>
+                    <div className='grid w-full max-w-3xl grid-cols-[auto_minmax(0,_1fr)] mt-10 grid-rows-6 place-self-center gap-x-4 lg:gap-x-32 grid-lines'>
                       <div className='grid items-center justify-items-start grid-rows-6 row-span-full text-xl uppercase text-[#BDBDBD]'>
                         <h2>Photo</h2>
                         <h2>Name</h2>
@@ -389,7 +390,7 @@ const Home: NextPage = () => {
                   </>
                 )}
               </main>
-              <footer className='flex justify-between w-full lg:max-w-3xl md:mt-3'>
+              <footer className='flex justify-between w-full lg:max-w-3xl mt-3'>
                 <p className='text-[#BDBDBD] text-sm'>
                   created by{' '}
                   <a href='https://devchallenges.io/portfolio/oudajosefu' className='text-[#8f8f8f] underline underline-offset-2'>
@@ -416,7 +417,10 @@ const Home: NextPage = () => {
                 />
               </a>
             </Link>
-            <h1 className='text-lg font-semibold mt-7'>Login</h1>
+            {router.query.signup === 'success' && (<p className='text-green-500 text-md mt-7'>
+              {router.query.message as string}
+            </p>)}
+            <h1 className={`text-lg font-semibold ${router.query.signup === 'success' || 'mt-7'}`}>Login</h1>
 
             <form className='w-full mt-7 placeholder:text-[#828282]'
               onSubmit={onSignInSubmit}>
@@ -436,7 +440,7 @@ const Home: NextPage = () => {
                 />
               </label>
               {signInFormErrors.email && (
-                <p className='text-red-500 normal-case'>{signInFormErrors.email.message}</p>
+                <p className='text-red-500 normal-case mt-2'>{signInFormErrors.email.message}</p>
               )}
 
               <label className='border border-[#BDBDBD] rounded-lg flex items-center py-3 px-3 gap-3 mt-4'>
@@ -445,7 +449,7 @@ const Home: NextPage = () => {
                   className='outline-none grow bg-inherit'
                   type={showPassword ? 'text' : 'password'} placeholder='Password'
                   {...signInFormRegister('password', {
-                    required: '* Password is required'
+                    required: '* Password is required',
                   })}
                 />
                 <button type='button' onClick={() => setShowPassword(!showPassword)}>
@@ -457,7 +461,7 @@ const Home: NextPage = () => {
                 </button>
               </label>
               {signInFormErrors.password && (
-                <p className='text-red-500 text-sm'>{signInFormErrors.password.message}</p>
+                <p className='text-red-500 text-sm mt-2'>{signInFormErrors.password.message}</p>
               )}
               <button className='bg-[#2f7bed] hover:bg-[#2b74d2] active:bg-[#1e5296] text-white w-full mt-6 rounded-lg py-2 font-semibold' type="submit">Login</button>
             </form>

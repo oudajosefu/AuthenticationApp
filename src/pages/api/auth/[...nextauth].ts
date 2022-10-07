@@ -11,9 +11,14 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "../../../server/db/client";
 import { env } from "../../../env/server.mjs";
 import { trpc } from "../../../utils/trpc";
+import { Prisma } from "@prisma/client";
 
 
 export const authOptions: NextAuthOptions = {
+  // Configure session
+  // session: {
+  //   strategy: 'jwt',
+  // },
   // Include user.id on session
   callbacks: {
     async session({ session, user }) {
@@ -35,10 +40,10 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         const { data } = trpc.useQuery(["credentials.check", credentials]);
-        if (data?.status === "ok" && data?.user) {
-          return data.user;
+        if (data?.status === 'success' && data?.user) {
+          return data?.user;
         } else {
-          throw new Error(data?.message as string);
+          return null;
         }
       }
     }),
@@ -63,13 +68,6 @@ export const authOptions: NextAuthOptions = {
       clientSecret: env.GITHUB_CLIENT_SECRET,
     }),
   ],
-  pages: {
-    signIn: "/",
-    newUser: "/",
-  },
-  // session: {
-  //   strategy: "jwt",
-  // }
 };
 
 export default NextAuth(authOptions);
