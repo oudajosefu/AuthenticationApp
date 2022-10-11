@@ -75,7 +75,8 @@ export const credentialsRouter = createRouter()
         });
         return {
           status: "success",
-          message: 'User created. Please log in.'
+          message: 'User created. Please log in.',
+          email: email,
         };
       } catch (err) {
         return {

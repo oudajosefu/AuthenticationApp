@@ -14,7 +14,7 @@ class MyDocument extends Document {
           <link rel="preconnect" href="https://fonts.gstatic.com" />
           <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
         </Head>
-        <body className='dark:bg-[#333333] dark:text-[#E0E0E0] font-noto-sans'>
+        <body className='bg-[#FAFAFB] dark:bg-[#333333] text-[#333333] dark:text-[#E0E0E0] font-noto-sans'>
           <Main />
           <NextScript />
         </body>

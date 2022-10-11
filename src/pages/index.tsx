@@ -7,7 +7,7 @@ import SocialButton from "../components/SocialButton";
 import Link from "next/link";
 import { useTheme } from "next-themes";
 import { signIn, signOut, useSession } from "next-auth/react";
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Menu, Transition } from "@headlessui/react";
 import MenuLinkButton from "../components/MenuLink";
 import { useForm } from "react-hook-form";
@@ -71,13 +71,16 @@ const Home: NextPage = () => {
     updateUser.mutate(data);
   });
 
-  const onSignInSubmit = signInFormHandleSubmit(async data => {
-    const signInResult = await signIn('credentials', {
+  const onSignInSubmit = signInFormHandleSubmit(data => {
+    signIn('credentials', {
       redirect: false,
       email: data.email,
       password: data.password,
+    }).then(res => {
+      if (res?.error) {
+        console.error(res.error);
+      }
     });
-    console.log(signInResult);
   });
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -220,7 +223,7 @@ const Home: NextPage = () => {
                   </label>
                 </div>
               )}
-              <main className={`w-full ${editMode ? 'mt-2' : 'mt-10'} max-w-3xl lg:p-12 place-self-center lg:ring-1 ring-[#E0E0E0] dark:ring-[#BDBDBD] rounded-3xl mx-auto`}>
+              <main className={`w-full ${editMode ? 'mt-2' : 'mt-10'} max-w-3xl lg:p-12 place-self-center lg:ring-1 ring-[#E0E0E0] dark:ring-[#BDBDBD] rounded-3xl mx-auto divide-y-2 divide-[#D3D3D3]`}>
                 {editMode ? (
                   <form className='flex flex-col max-w-sm gap-4 mx-auto lg:mx-0'
                     onSubmit={onEditSubmit}>
@@ -263,7 +266,7 @@ const Home: NextPage = () => {
                     <label className='flex flex-col gap-2 text-sm font-medium capitalize'>
                       <h1>Name</h1>
                       <input
-                        className='rounded-xl p-3 ring-1 ring-[#828282] bg-[#3B3B3B]'
+                        className='rounded-xl p-3 ring-1 ring-[#828282] bg-gray-100 dark:bg-[#3B3B3B]'
                         type='text'
                         placeholder='Enter your name...'
                         defaultValue={user.name ?? ''}
@@ -276,7 +279,7 @@ const Home: NextPage = () => {
                     <label className='flex flex-col gap-2 text-sm font-medium capitalize'>
                       <h1>Bio</h1>
                       <textarea
-                        className='rounded-xl p-3 ring-1 ring-[#828282] bg-[#3B3B3B]'
+                        className='rounded-xl p-3 ring-1 ring-[#828282] bg-gray-100 dark:bg-[#3B3B3B]'
                         placeholder='Enter your bio...'
                         defaultValue={user.bio ?? ''}
                         rows={3}
@@ -289,7 +292,7 @@ const Home: NextPage = () => {
                     <label className='flex flex-col gap-2 text-sm font-medium capitalize'>
                       <h1>Phone</h1>
                       <input
-                        className='rounded-xl p-3 ring-1 ring-[#828282] bg-[#3B3B3B]'
+                        className='rounded-xl p-3 ring-1 ring-[#828282] bg-gray-100 dark:bg-[#3B3B3B]'
                         type='text'
                         placeholder='Enter your phone...'
                         defaultValue={user.phone ?? ''}
@@ -306,7 +309,7 @@ const Home: NextPage = () => {
                     <label className='flex flex-col gap-2 text-sm font-medium capitalize'>
                       <h1>Email</h1>
                       <input
-                        className='rounded-xl p-3 ring-1 ring-[#828282] bg-[#3B3B3B]'
+                        className='rounded-xl p-3 ring-1 ring-[#828282] bg-gray-100 dark:bg-[#3B3B3B]'
                         type='email'
                         placeholder='Enter your email...'
                         defaultValue={user.email ?? ''}
@@ -319,10 +322,9 @@ const Home: NextPage = () => {
                     <label className='flex flex-col gap-2 text-sm font-medium capitalize'>
                       <h1>Password</h1>
                       <input
-                        className='rounded-xl p-3 ring-1 ring-[#828282] bg-[#3B3B3B]'
+                        className='rounded-xl p-3 ring-1 ring-[#828282] bg-gray-100 dark:bg-[#3B3B3B]'
                         type='password'
                         placeholder='Enter your password...'
-                        defaultValue={user.password ?? ''}
                         {...editFormRegister('password')}
                       />
                       {editFormErrors.password && (<p className='text-red-500 normal-case'>{editFormErrors.password.message}</p>)}
@@ -355,21 +357,13 @@ const Home: NextPage = () => {
                         <p className='text-green-500 normal-case col-start-2 justify-self-end text-right'>Profile updated successfully</p>
                       )}
                     </div>
-                    <div className='grid w-full max-w-3xl grid-cols-[auto_minmax(0,_1fr)] mt-10 grid-rows-6 place-self-center gap-x-4 lg:gap-x-32 grid-lines'>
-                      <div className='grid items-center justify-items-start grid-rows-6 row-span-full text-xl uppercase text-[#BDBDBD]'>
-                        <h2>Photo</h2>
-                        <h2>Name</h2>
-                        <h2>Bio</h2>
-                        <h2>Phone</h2>
-                        <h2>Email</h2>
-                        <h2>Password</h2>
-                      </div>
-
-                      <div className='grid items-center grid-rows-6 overflow-hidden justify-items-end row-span-full lg:justify-items-start'>
+                    <div className='grid w-full text-xl max-w-3xl mt-10 grid-rows-[repeat(6,_auto)] place-self-center lg:gap-x-32 divide-y divide-[#E0E0E0]'>
+                      <div className='flex justify-between items-center py-2'>
+                        <h2 className='min-w-[7rem] uppercase text-[#BDBDBD]'>Photo</h2>
                         {!user.image ? (
                           <UserCircleIcon className='w-20 h-20 text-gray-400' />
                         ) : (
-                          <div className='flex py-2'>
+                          <div className='flex'>
                             <Image
                               className='rounded-lg'
                               src={user.image}
@@ -380,24 +374,39 @@ const Home: NextPage = () => {
                             />
                           </div>
                         )}
-                        <p className='text-xl truncate'>{user.name}</p>
-                        <p className='text-xl truncate'>{user.bio}</p>
-                        <p className='text-xl truncate'>{user.phone}</p>
-                        <p className='text-xl truncate'>{user.email}</p>
-                        <p className='text-xl truncate'>********</p>
+                      </div>
+                      <div className='flex justify-between items-center py-6'>
+                        <h2 className='min-w-[7rem] uppercase text-[#BDBDBD]'>Name</h2>
+                        <p>{user.name}</p>
+                      </div>
+                      <div className='flex justify-between items-center py-6'>
+                        <h2 className='min-w-[7rem] uppercase text-[#BDBDBD]'>Bio</h2>
+                        <p>{user.bio}</p>
+                      </div>
+                      <div className='flex justify-between items-center py-6'>
+                        <h2 className='min-w-[7rem] uppercase text-[#BDBDBD]'>Phone</h2>
+                        <p>{user.phone}</p>
+                      </div>
+                      <div className='flex justify-between items-center py-6'>
+                        <h2 className='min-w-[7rem] uppercase text-[#BDBDBD]'>Email</h2>
+                        <p className='text-ellipsis'>{user.email}</p>
+                      </div>
+                      <div className='flex justify-between items-center py-6'>
+                        <h2 className='min-w-[7rem] uppercase text-[#BDBDBD]'>Password</h2>
+                        <p>********</p>
                       </div>
                     </div>
                   </>
                 )}
               </main>
               <footer className='flex justify-between w-full lg:max-w-3xl mt-3'>
-                <p className='text-[#BDBDBD] text-sm'>
+                <p className='text-[#828282] text-sm'>
                   created by{' '}
-                  <a href='https://devchallenges.io/portfolio/oudajosefu' className='text-[#8f8f8f] underline underline-offset-2'>
+                  <a href='https://devchallenges.io/portfolio/oudajosefu' className='underline visited:text-gray-800 dark:visited:text-gray-400 underline-offset-2'>
                     oudajosefu
                   </a>
                 </p>
-                <p className='text-[#BDBDBD] text-sm'>devChallenges.io</p>
+                <p className='text-[#828282] text-sm'>devChallenges.io</p>
               </footer>
             </>
           )}
@@ -430,6 +439,7 @@ const Home: NextPage = () => {
                   className='outline-none grow bg-inherit'
                   type="email"
                   placeholder='Email'
+                  defaultValue={router.query.email}
                   {...signInFormRegister('email', {
                     required: '* Email is required',
                     pattern: {

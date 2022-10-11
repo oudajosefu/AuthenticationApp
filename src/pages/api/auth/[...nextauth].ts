@@ -11,14 +11,17 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "../../../server/db/client";
 import { env } from "../../../env/server.mjs";
 import { trpc } from "../../../utils/trpc";
-import { Prisma } from "@prisma/client";
-
 
 export const authOptions: NextAuthOptions = {
   // Configure session
   // session: {
   //   strategy: 'jwt',
   // },
+  // // Configure pages
+  pages: {
+    signIn: "/",
+    signOut: "/",
+  },
   // Include user.id on session
   callbacks: {
     async session({ session, user }) {
@@ -28,6 +31,21 @@ export const authOptions: NextAuthOptions = {
       }
       return session;
     },
+    // async signIn({ user, account, profile, email, credentials }) {
+    //   if (credentials) {
+    //     try {
+    //       const { data } = trpc.useQuery(["credentials.check", credentials as Record<'email' | 'password', string>]);
+    //       if (data && data.status === "success") {
+    //         return true;
+    //       }
+    //       return false;
+    //     } catch (err) {
+    //       throw new Error('SIGN IN ERROR: ' + err as string);
+    //     }
+    //   }
+    //   console.log("signIn", { user, account, profile, email, credentials });
+    //   return true;
+    // }
   },
   // Configure one or more authentication providers
   adapter: PrismaAdapter(prisma),
@@ -40,8 +58,8 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         const { data } = trpc.useQuery(["credentials.check", credentials]);
-        if (data?.status === 'success' && data?.user) {
-          return data?.user;
+        if (data && data.status === 'success' && data.user) {
+          return data.user;
         } else {
           return null;
         }

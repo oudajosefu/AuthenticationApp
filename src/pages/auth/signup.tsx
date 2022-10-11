@@ -18,7 +18,6 @@ type SignUpFormData = {
 
 const Signup: NextPage = () => {
   const { systemTheme } = useTheme();
-  console.log(systemTheme);
 
   const router = useRouter();
 
@@ -29,7 +28,7 @@ const Signup: NextPage = () => {
       if (data.status === 'error') {
         setSignUpError(data.message);
       } else {
-        router.push(`/?signup=${data.status}&message=${data.message}`);
+        router.push(`/?signup=${data.status}&message=${data.message}&email=${data.email}`);
       }
     }
   });
